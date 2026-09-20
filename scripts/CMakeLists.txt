@@ -101,8 +101,13 @@ if (MSVC)
 	# remove compiler RTTI option
 	string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 	set(cc_opts
-		/Oy /GR- /EHs-c- /Zc:preprocessor
+		/Oy /GR- /EHs-c-
 	)
+	# Dart >= 3.12 uses __VA_OPT__ (C++20): MSVC needs the conformant preprocessor.
+	# Older Dart versions FAIL to compile with /Zc:preprocessor, so gate by version.
+	if (DART_VERSION VERSION_GREATER_EQUAL "3.12")
+		list(APPEND cc_opts /Zc:preprocessor)
+	endif()
 else()
 	set(cc_opts
 		-O3 -fno-ident -fdata-sections -ffunction-sections
